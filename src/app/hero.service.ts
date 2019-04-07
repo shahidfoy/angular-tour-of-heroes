@@ -22,6 +22,17 @@ export class HeroService {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })
   }
 
+  searchHeroes(term: string): Observable<Hero[]> {
+    if(!term.trim()) {
+      return of([]);
+    }
+
+    return this.http.get<Hero[]>(`${this.heroesUrl}/?name=${term}`).pipe(
+      tap(_ => this.log(`found heroes matching "${term}."`)),
+      catchError(this.handleError<Hero[]>('searchHeroes', []))
+    )
+  }
+
   getHeroes(): Observable<Hero[]> {
     // this.messageService.add('HeroService: fetched heroes');
     // return of (HEROES);
@@ -59,6 +70,7 @@ export class HeroService {
     );
   }
 
+  /** DELETE: delete the hero from the server */
   deleteHero(hero: Hero | number): Observable<Hero> {
     const id = typeof hero === 'number' ? hero : hero.id;
     const url = `${this.heroesUrl}/${id}`;
